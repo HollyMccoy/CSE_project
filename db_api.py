@@ -6,7 +6,8 @@ def post_db(sound,device):
     sound_class=sound
     #deviceID will also pass into function
     deviceID=device
-    URL = "https://lrurlbq1kk.execute-api.us-east-2.amazonaws.com/beta/sound"
+    
+    #URL = "put api gateway URL here"
     headers = {"Content-Type":"aplication/json"}
     params = {"payload":"payload???"}
 
