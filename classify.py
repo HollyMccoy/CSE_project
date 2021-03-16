@@ -43,8 +43,8 @@ def make_classification(args, src_dir, timestamp):
         y_pred = model.predict(X_batch)
         y_mean = np.mean(y_pred, axis=0)
         y_pred = np.argmax(y_mean)
-	time_stamp = timestamp
-	print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
-	# make post request
+        time_stamp = timestamp
+        print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
+        # make post request
 
 
