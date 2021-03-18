@@ -11,12 +11,12 @@ def record(seconds=20, out="out.wav", sample_rate=16000, channels=1):  #
     # write(out, sample_rate, myrecording)  # Save as WAV file#
 
 
-    T = 3  # sample duration (seconds)
-    f = 441.0  # sound frequency (Hz)#
+    T = 20  # sample duration (seconds)
+    f = 16000  # sound frequency (Hz)#
     t = np.linspace(0, T, T * sample_rate, endpoint=False)#
     x = np.sin(2 * np.pi * f * t)#
 #
-    wavio.write(out,x, sample_rate, sampwidth=2)#
+    wavio.write(out,myrecording, sample_rate, sampwidth=2)#
 
     # print(out)
 ### import subprocess
