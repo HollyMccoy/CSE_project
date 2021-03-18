@@ -113,7 +113,7 @@ if __name__ == '__main__':
                         help='batch size')
     parser.add_argument('--delta_time', '-dt', type=float, default=1.0,
                         help='time in seconds to sample audio')
-    parser.add_argument('--sample_rate', '-sr', type=int, default=16000,
+    parser.add_argument('--sample_rate', '-sr', type=int, default=44100,
                         help='sample rate of clean audio')
     args, _ = parser.parse_known_args()
 

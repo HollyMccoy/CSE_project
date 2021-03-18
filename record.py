@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-def record(seconds=0, out="out.wav", sample_rate=16000, channels=2):
+def record(seconds=0, out="out.wav", sample_rate=44100, channels=2):
     proc_args = ["arecord", "-D", "hw:1,0", "-f", "S16_LE", "-r", str(sample_rate), "-c", str(channels), out]
 
     if (seconds > 0):

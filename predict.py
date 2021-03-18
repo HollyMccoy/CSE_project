@@ -62,7 +62,7 @@ if __name__ == '__main__':
                         help='directory containing wavfiles to predict')
     parser.add_argument('--dt', type=float, default=1.0,
                         help='time in seconds to sample audio')
-    parser.add_argument('--sr', type=int, default=16000,
+    parser.add_argument('--sr', type=int, default=44100,
                         help='sample rate of clean audio')
     parser.add_argument('--threshold', type=str, default=20,
                         help='threshold magnitude for np.int16 dtype')

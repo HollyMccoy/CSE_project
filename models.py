@@ -8,7 +8,7 @@ import tensorflow as tf
 import os
 
 
-def Conv1D(N_CLASSES=10, SR=16000, DT=1.0):
+def Conv1D(N_CLASSES=10, SR=44100, DT=1.0):
     input_shape = (int(SR*DT), 1)
     i = get_melspectrogram_layer(input_shape=input_shape,
                                  n_mels=128,
@@ -41,7 +41,7 @@ def Conv1D(N_CLASSES=10, SR=16000, DT=1.0):
     return model
 
 
-def Conv2D(N_CLASSES=10, SR=16000, DT=1.0):
+def Conv2D(N_CLASSES=10, SR=44100, DT=1.0):
     input_shape = (int(SR*DT), 1)
     i = get_melspectrogram_layer(input_shape=input_shape,
                                  n_mels=128,
@@ -74,7 +74,7 @@ def Conv2D(N_CLASSES=10, SR=16000, DT=1.0):
     return model
 
 
-def LSTM(N_CLASSES=10, SR=16000, DT=1.0):
+def LSTM(N_CLASSES=10, SR=44100, DT=1.0):
     input_shape = (int(SR*DT), 1)
     i = get_melspectrogram_layer(input_shape=input_shape,
                                      n_mels=128,
