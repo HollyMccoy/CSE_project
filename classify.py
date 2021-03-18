@@ -24,27 +24,49 @@ def make_classification(args, src_dir, timestamp):
     le = LabelEncoder()
     y_true = le.fit_transform(labels)
 
-    for z, wav_fn in tqdm(enumerate(wav_paths), total=len(wav_paths)):
-        rate, wav = downsample_mono(wav_fn, args.sr)
-        mask, env = envelope(wav, rate, threshold=args.threshold)
-        clean_wav = wav[mask]
-        step = int(args.sr*args.dt)
-        batch = []
+    rate, wav = downsample_mono(src_dir, args.sr)#
+    mask, env = envelope(wav, rate, threshold=args.threshold)#
+    clean_wav = wav[mask]#
+    step = int(args.sr * args.dt)#
+    batch = []#
+#
+    for i in range(0, clean_wav.shape[0], step):#
+        sample = clean_wav[i:i + step]#
+        sample = sample.reshape(-1, 1)#
+        if sample.shape[0] < step:#
+            tmp = np.zeros(shape=(step, 1), dtype=np.float32)#
+            tmp[:sample.shape[0], :] = sample.flatten().reshape(-1, 1)#
+            sample = tmp#
+        batch.append(sample)#
+    print(batch)#
+    X_batch = np.array(batch, dtype=np.float32)#
+    y_pred = model.predict(X_batch)#
+    y_mean = np.mean(y_pred, axis=0)#
+    y_pred = np.argmax(y_mean)#
+    time_stamp = timestamp#
+    print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))#
+    # make post request
 
-        for i in range(0, clean_wav.shape[0], step):
-            sample = clean_wav[i:i+step]
-            sample = sample.reshape(-1, 1)
-            if sample.shape[0] < step:
-                tmp = np.zeros(shape=(step, 1), dtype=np.float32)
-                tmp[:sample.shape[0],:] = sample.flatten().reshape(-1, 1)
-                sample = tmp
-            batch.append(sample)
-        # print(batch)
-        X_batch = np.array(batch, dtype=np.float32)
-        y_pred = model.predict(X_batch)
-        y_mean = np.mean(y_pred, axis=0)
-        y_pred = np.argmax(y_mean)
-        time_stamp = timestamp
-        print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
-        # make post request
+    # for z, wav_fn in tqdm(enumerate(wav_paths), total=len(wav_paths)):
+    #     rate, wav = downsample_mono(wav_fn, args.sr)
+    #     mask, env = envelope(wav, rate, threshold=args.threshold)
+    #     clean_wav = wav[mask]
+    #     step = int(args.sr*args.dt)
+    #     batch = []
 
+    #     for i in range(0, clean_wav.shape[0], step):
+    #         sample = clean_wav[i:i+step]
+    #         sample = sample.reshape(-1, 1)
+    #         if sample.shape[0] < step:
+    #             tmp = np.zeros(shape=(step, 1), dtype=np.float32)
+    #             tmp[:sample.shape[0],:] = sample.flatten().reshape(-1, 1)
+    #             sample = tmp
+    #         batch.append(sample)
+    #     print(batch)
+    #     X_batch = np.array(batch, dtype=np.float32)
+    #     y_pred = model.predict(X_batch)
+    #     y_mean = np.mean(y_pred, axis=0)
+    #     y_pred = np.argmax(y_mean)
+    #     time_stamp = timestamp
+    #     print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
+    #     # make post request
