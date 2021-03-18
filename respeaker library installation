@@ -1,0 +1,6 @@
+First try to follow linux installation on: https://github.com/respeaker/respeaker_python_library
+
+If you get an error when trying to install pocketsphinx:
+sudo apt-get install libasound-dev portaudio19-dev libportaudio2 libportaudiocpp0
+sudo apt-get install ffmpeg libav-tools
+pip3 install pyaudio respeaker --upgrade
