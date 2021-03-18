@@ -37,7 +37,7 @@ if __name__ == '__main__':
     
         # 2. call make_classification on this folder
 
-        make_classification(args, dir, timestamp)
+        make_classification(args, output, timestamp)
 
         # 3. delete directory
         
