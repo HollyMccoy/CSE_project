@@ -1,3 +1,0 @@
--Follow direction for Jetson Nano (https://wiki.seeedstudio.com/ReSpeaker_2_Mics_Pi_HAT/)
-	-Replace linux header version with actual system version
-		-E.g., "140" to "201"
