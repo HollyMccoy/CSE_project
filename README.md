@@ -1,4 +1,4 @@
-# CSE_project
+# Nielsen Sound Classifier for Correlation of Ambient Room Noise and Media Content
 CSE senior capstone project with Nielsen
 
 List of sound categories:
