@@ -1,6 +1,7 @@
 # use for running live_classify for specific # of tests
+# starts checking for accuracy after everything is loaded in the beginning
 # command line: python live_classify.py {"class name"} {number of iterations}
-# make sure class name is in quotation marks, also case sensitive
+# make sure class name is in quotation marks and matches exactly with the folder names
 
 # from classify import make_classification
 from record import record
@@ -10,6 +11,8 @@ import shutil
 import argparse
 import sys
 
+import tensorflow as tf
+import logging
 # from original classify.py
 from tensorflow.keras.models import load_model
 from clean import downsample_mono, envelope
@@ -24,6 +27,9 @@ actual = sys.argv[1]
 num = int(sys.argv[2])
 correct = []
 test_num = 0
+
+# prevents retracing warnings from printing to console
+logging.getLogger('tensorflow').disabled = True
 
 def make_classification(args, src_dir, timestamp):
 
@@ -59,13 +65,13 @@ def make_classification(args, src_dir, timestamp):
     y_mean = np.mean(y_pred, axis=0)#
     y_pred = np.argmax(y_mean)#
     time_stamp = timestamp#
-    print('\nTest #{}: Timestamp: {}, Predicted class: {}'.format(test_num+1, time_stamp, classes[y_pred]))#
-
-    # changes from classify.py
-    if classes[y_pred] == actual:
-        correct.append(1)
-    else:
-        correct.append(0)
+    
+    if test_num > 0:
+        print('Timestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))#
+        if classes[y_pred] == actual:
+            correct.append(1)
+        else:
+            correct.append(0)
 
     # make post request
     # for z, wav_fn in tqdm(enumerate(wav_paths), total=len(wav_paths)):
@@ -120,10 +126,13 @@ if __name__ == '__main__':
         if not os.path.exists(timestamp):
             os.makedirs(timestamp)  # make a directory
         output = dir + "/out.wav"
-        print("Recording starting ({})".format(output))
+        
+        if test_num > 0:
+            print(f"\nTest #{test_num}\nRecording starting ({output})")
 
         record(seconds=5, out=output)
-
+        print("Done.")
+        
         # 2. call make_classification on this folder
 
         make_classification(args, output, timestamp)
@@ -131,6 +140,8 @@ if __name__ == '__main__':
         # 3. delete directory
 
         shutil.rmtree(dir)
+        
         test_num+=1
 
-print(f"total accuracy: {100 * sum(correct)/len(correct)}%")
+print('n', 50*'-')
+print(f"Total accuracy from test #1-{test_num - 1}: {100 * sum(correct)/len(correct)}%")
