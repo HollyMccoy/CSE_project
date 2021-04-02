@@ -1,13 +1,57 @@
-from classify import make_classification
 from record import record
+from tensorflow.keras.models import load_model
+from clean import downsample_mono, envelope
+from kapre.time_frequency import STFT, Magnitude, ApplyFilterbank, MagnitudeToDecibel
+from sklearn.preprocessing import LabelEncoder
+from glob import glob
+from tqdm import tqdm
+import numpy as np
+import pandas as pd
 import time
 import os
 import shutil
 import argparse
+import threading
+
+def make_classification(args, src_dir, timestamp, dir, model):
+    
+    wav_paths = glob('{}/**'.format(src_dir), recursive=True)
+    wav_paths = sorted([x.replace(os.sep, '/') for x in wav_paths if '.wav' in x])
+    classes = sorted(os.listdir(args.src_dir))
+    labels = [os.path.split(x)[0].split('/')[-1] for x in wav_paths]
+    le = LabelEncoder()
+    y_true = le.fit_transform(labels)
+    
+    rate, wav = downsample_mono(src_dir, args.sr)
+    mask, env = envelope(wav, rate, threshold=args.threshold)
+    clean_wav = wav[mask]
+    step = int(args.sr * args.dt)
+    batch = []
+    
+    for i in range(0, clean_wav.shape[0], step):
+        sample = clean_wav[i:i + step]
+        sample = sample.reshape(-1, 1)
+        if sample.shape[0] < step:
+            tmp = np.zeros(shape=(step, 1), dtype=np.float32)
+            tmp[:sample.shape[0], :] = sample.flatten().reshape(-1, 1)
+            sample = tmp
+        batch.append(sample)
+        
+    X_batch = np.array(batch, dtype=np.float32)
+    y_pred = model.predict(X_batch)
+    y_mean = np.mean(y_pred, axis=0)
+    y_pred = np.argmax(y_mean)
+    time_stamp = timestamp
+    print('Timestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
+    # make post request
+
+    shutil.rmtree(dir)
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Audio Classification Training')
+    parser = argparse.ArgumentParser(description='Live classifier for mic audio')
+    parser.add_argument('--rec_seconds', type=int, default=20,
+                        help='number of seconds to record for classification')
     parser.add_argument('--model_fn', type=str, default='models/conv2d.h5',
                         help='model file to make predictions')
     parser.add_argument('--pred_fn', type=str, default='y_pred',
@@ -22,23 +66,41 @@ if __name__ == '__main__':
                         help='threshold magnitude for np.int16 dtype')
     args, _ = parser.parse_known_args()
 
+    model = load_model(args.model_fn,
+        custom_objects={'STFT':STFT,
+                        'Magnitude':Magnitude,
+                        'ApplyFilterbank':ApplyFilterbank,
+                        'MagnitudeToDecibel':MagnitudeToDecibel})
+
+    # force pre-load tf dynamic libraries
+
+    dummy_data = []
+    dummy_data.append(np.empty((16000,1)))
+    dummy_batch = np.array(dummy_data, dtype=np.float32)
+    model.predict(dummy_batch)
+
+    threads = []
+
+    print("***********Starting***********")
+
     while (True):
-        # 1. record 5 secs and store in a folder
+        # record x secs and store in folder
         
         t = time.localtime()
         timestamp = time.strftime("%H%M%S", t)
         dir = timestamp
         if not os.path.exists(timestamp):
-            os.makedirs(timestamp)      # make a directory
+            os.makedirs(timestamp)
         output = dir + "/out.wav"
-        print("Recording starting ({})".format(output))
+        print("Timestamp: {}, Recording starting".format(timestamp))
 
-        record(seconds=5, out=output)
+        record(seconds=args.rec_seconds, out=output)
     
-        # 2. call make_classification on this folder
+        # call make_classification on folder
 
-        make_classification(args, output, timestamp)
+        #for thread in threads:
+            #thread.join()
 
-        # 3. delete directory
-        
-        shutil.rmtree(dir)
+        t = threading.Thread(target=make_classification, args=(args, output, timestamp, dir, model))
+        threads.append(t)
+        t.start()
