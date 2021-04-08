@@ -11,3 +11,5 @@ List of sound categories:
 - Laughter
 - Speech
 - Vacuuming
+
+current accuracy can be seen at: https://docs.google.com/spreadsheets/d/1ZoWMZ08VfAv2wYF7hDifT5gPKEhO4BDp5OoMcfIkY1I/edit?usp=sharing
