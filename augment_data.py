@@ -5,6 +5,8 @@ import librosa
 import argparse
 import os
 
+# example: python3 augment_data.py --src_dir='wavfiles' --trgt_dir='synthdata'
+
 def add_noise(data, noise_factor=100):
     if (noise_factor == 0):
         return data
@@ -45,11 +47,11 @@ if __name__ == '__main__':
                         help='directory of audio to augment')
     parser.add_argument('--trgt_dir', type=str, default='synthdata',
                         help='directory to add augmented output data to')
-    parser.add_argument('--en_noise', type=bool, default=False,
+    parser.add_argument('--en_noise', type=bool, default=True,
                         help='enable noise injection')
-    parser.add_argument('--en_time_shift', type=bool, default=False,
+    parser.add_argument('--en_time_shift', type=bool, default=True,
                         help='enable time shifting')
-    parser.add_argument('--en_pitch_mod', type=bool, default=False,
+    parser.add_argument('--en_pitch_mod', type=bool, default=True,
                         help='enable pitch modulation')
     parser.add_argument('--en_speed_mod', type=bool, default=True,
                         help='enable speed modulation')
@@ -78,14 +80,17 @@ if __name__ == '__main__':
             os.makedirs(args.trgt_dir + "/" + directory)
         for filename in os.listdir(args.src_dir + "/" + directory):
             # load file into np array
-            rate, a = read(args.src_dir + "/" + directory + "/" + filename)        
-            data = np.array(a, dtype=float)
+            rate, a = read(args.src_dir + "/" + directory + "/" + filename)
+            if (len(a.shape) == 2):
+                data = np.array(a[:, 0], dtype=float)
+            else:
+                data = np.array(a, dtype=float)
 
             if (args.en_noise):
                 data = add_noise(data)
 
             if (args.en_time_shift):
-                data = add_time_shift(data, sampling_rate=rate, shift_max=5, shift_direction='right')
+                data = add_time_shift(data, sampling_rate=rate, shift_max=2, shift_direction='right')
 
             if (args.en_pitch_mod):
                 data = add_pitch_mod(data, rate)
