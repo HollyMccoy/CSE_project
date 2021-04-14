@@ -1,19 +1,11 @@
-# use for running live_classify for specific # of tests
-# starts checking for accuracy after everything is loaded in the beginning
-# command line: python live_classify.py {"class name"} {number of iterations}
-# make sure class name is in quotation marks and matches exactly with the folder names
+# for testing accuracy of model and prints out % of all predicted sounds
+# default number of tests = 30
+# custom number of tests:
+# ex: python live_classify_accuracy.py 50 <-- for 50 tests
 
-# from classify import make_classification
 from record import record
-import time
-import os
-import shutil
-import argparse
-import sys
-
+import time, os, shutil, argparse, sys, logging
 import tensorflow as tf
-import logging
-# from original classify.py
 from tensorflow.keras.models import load_model
 from clean import downsample_mono, envelope
 from kapre.time_frequency import STFT, Magnitude, ApplyFilterbank, MagnitudeToDecibel
@@ -23,12 +15,8 @@ from glob import glob
 import pandas as pd
 from tqdm import tqdm
 
-actual = sys.argv[1]
-num = int(sys.argv[2])
-correct = []
-test_num = 0
 
-# prevents retracing warnings from printing to console
+# prevents retracing errors from printing
 logging.getLogger('tensorflow').disabled = True
 
 def make_classification(args, src_dir, timestamp):
@@ -50,8 +38,8 @@ def make_classification(args, src_dir, timestamp):
     clean_wav = wav[mask]#
     step = int(args.sr * args.dt)#
     batch = []#
-#
-    for i in range(0, clean_wav.shape[0], step):#
+
+    for i in range(0, clean_wav.shape[0], step):# 
         sample = clean_wav[i:i + step]#
         sample = sample.reshape(-1, 1)#
         if sample.shape[0] < step:#
@@ -59,19 +47,18 @@ def make_classification(args, src_dir, timestamp):
             tmp[:sample.shape[0], :] = sample.flatten().reshape(-1, 1)#
             sample = tmp#
         batch.append(sample)#
+        
 #    print(batch)#
     X_batch = np.array(batch, dtype=np.float32)#
-    y_pred = model.predict(X_batch)#
+    y_pred = model.predict(X_batch)
+#    y_pred = predict(model, X_batch) # retracing warning fix attempt
     y_mean = np.mean(y_pred, axis=0)#
     y_pred = np.argmax(y_mean)#
     time_stamp = timestamp#
     
     if test_num > 0:
         print('Timestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))#
-        if classes[y_pred] == actual:
-            correct.append(1)
-        else:
-            correct.append(0)
+        predicts.append(classes[y_pred])
 
     # make post request
     # for z, wav_fn in tqdm(enumerate(wav_paths), total=len(wav_paths)):
@@ -115,8 +102,14 @@ if __name__ == '__main__':
     parser.add_argument('--threshold', type=str, default=20,
                         help='threshold magnitude for np.int16 dtype')
     args, _ = parser.parse_known_args()
-
-    # while (True):
+    
+    num = 31 # 30 tests by default, extra 1 for ignoring first prediction during initial load
+    if len(sys.argv) > 1:
+        num = int(sys.argv[1]) + 1
+    sound_classes = sorted(os.listdir(args.src_dir))
+    predicts = []
+    test_num = 0
+    
     while(test_num < num):
         # 1. record 5 secs and store in a folder
 
@@ -126,13 +119,11 @@ if __name__ == '__main__':
         if not os.path.exists(timestamp):
             os.makedirs(timestamp)  # make a directory
         output = dir + "/out.wav"
-        
         if test_num > 0:
             print(f"\nTest #{test_num}\nRecording starting ({output})")
 
         record(seconds=5, out=output)
         print("Done.")
-        
         # 2. call make_classification on this folder
 
         make_classification(args, output, timestamp)
@@ -140,8 +131,21 @@ if __name__ == '__main__':
         # 3. delete directory
 
         shutil.rmtree(dir)
-        
+
         test_num+=1
 
-print('n', 50*'-')
-print(f"Total accuracy from test #1-{test_num - 1}: {100 * sum(correct)/len(correct)}%")
+
+    # accuracy info
+    print('\n', 50*'=')
+    print("Prediction statistics: ")
+    correct_stats = []
+    for x in sound_classes:
+        for y in predicts:
+            if x == y:
+                correct_stats.append(1)
+            elif x != y:
+                correct_stats.append(0)
+        stats = 100 * sum(correct_stats)/len(predicts)
+        if stats > 0:
+            print(f"{x}: {round(stats,2)}%")
+        correct_stats.clear()
