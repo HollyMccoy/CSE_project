@@ -1,3 +1,5 @@
+# https://vairix.com/tech-blog/get-and-put-data-using-lambda-and-dynamodb-simple-and-clear  ### follow the IAM tutorial of this section in order for this code to work ##
+# date and UTC are constant because this helped testing, change to comment on line for live posting
 import json
 import boto3
 import datetime
