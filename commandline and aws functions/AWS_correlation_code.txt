@@ -1,0 +1,63 @@
+import json
+import boto3
+import datetime
+
+from boto3.dynamodb.conditions import Key
+
+dynamodb = boto3.resource('dynamodb')
+class_table = dynamodb.Table('sound_classifications')
+correlate_table = dynamodb.Table('sound_correlations')
+
+
+
+
+def query(date,UTC,deviceID):
+    
+    
+   
+    response = class_table.query(
+        ProjectionExpression="#dt, UTC, deviceID, soundID",
+        ExpressionAttributeNames={"#dt": "date"},
+        KeyConditionExpression=Key('date').eq(date)  # &  Key('deviceID').eq(deviceID) 
+    )
+    return response['Items']
+
+
+
+
+def lambda_handler(event, context):
+    returned = ""
+    UTC="12:34:15"    # datetime.datetime.now().strftime("%H:%M:%S")
+    
+    date ="03/19/21"    # datetime.date.today().strftime("%m/%d/%y")
+    
+    
+    print(f"Classes from {date}")
+    classes = query(date,UTC,"holly")
+    
+    for i in range(len(classes)):
+        for j in range(i,len(classes)):
+            if ( classes[i]['UTC'][0:6] == classes[j]['UTC'][0:6] and classes[i]['soundID'] == classes[j]['soundID']):
+                
+                deviceID = classes[i]["deviceID"]
+                date = classes[i]["date"]
+                UTC = classes[i]["UTC"][0:6]
+                soundID = classes[i]["soundID"]
+                Item = {
+                    "deviceID": deviceID,
+                    "date" : date,
+                    "UTC": UTC,
+                    "soundID" : soundID
+                }
+
+                correlate_table.put_item(Item=Item)
+            
+            
+        returned += classes[i]['date'] + ":" + classes[i]['UTC'] + ":" + classes[i]['deviceID'] + ":" + classes[i]['soundID'] + '       '
+        
+    
+    return {returned
+    }
+    
+    
+    
