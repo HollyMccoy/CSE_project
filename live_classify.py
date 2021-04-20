@@ -95,7 +95,7 @@ if __name__ == '__main__':
         print("Timestamp: {}, Recording starting".format(timestamp))
 
         record(seconds=args.rec_seconds, out=output)
-    
+        UTC = str(datetime.datetime.now().strftime("%H:%M:%S"))
         # call make_classification on folder
 
         #for thread in threads:
