@@ -11,7 +11,7 @@ def post_db(sound,device):
     headers = {"Content-Type":"aplication/json"}
     params = {"payload":"payload???"}
 
-    data = dict(deviceID=deviceID,date=str(datetime.date.today().strftime("%m/%d/%y")),UTC=str(datetime.datetime.now().strftime("%H:%M:%S")),soundID=sound_class,roomID=#this device room id (for now the name of the nano holder))
+    data = dict(deviceID=deviceID,date=str(datetime.date.today().strftime("%m/%d/%y")),UTC=str(datetime.datetime.now().strftime("%H:%M:%S")),soundID=sound_class)
 
     response = requests.post(URL,json=data,headers= headers)
 
