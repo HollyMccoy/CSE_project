@@ -2,6 +2,7 @@
 # date and UTC are constant because this helped testing, change to comment on line for live posting
 # must add trigger for every time a post is madde to the classification database # this resource will help with that 
 # https://www.tutorialspoint.com/aws_lambda/aws_lambda_using_lambda_function_with_amazon_dynamodb.htm
+# use a role with dynamodb full access
 import json
 import boto3
 import datetime
@@ -31,7 +32,7 @@ def query(date):
 
 def lambda_handler(event, context):
     returned = ""
-    UTC = datetime.datetime.now().strftime("%H:%M:%S")
+    UTC ="03:00:12" # datetime.datetime.now().strftime("%H:%M:%S")
     
     date = datetime.date.today().strftime("%m/%d/%y")
     
@@ -43,16 +44,16 @@ def lambda_handler(event, context):
         
         for j in range(i+1,len(classes)):
             
-            if ( classes[i]['UTC'][0:6] == classes[j]['UTC'][0:6] and abs( int( classes[j]['UTC'][7:9]) - int( classes[i]['UTC'][7:9]) ) < 40  and  classes[i]['deviceID'][0:5] == classes[j]['deviceID'][0:5] and classes[i]['deviceID'] != classes[j]['deviceID'] ):
+            if ( classes[i]['UTC'][0:6] == classes[j]['UTC'][0:6] and abs( int( classes[j]['UTC'][7:9]) - int( classes[i]['UTC'][7:9]) ) < 10  and  classes[i]['deviceID'][0:5] == classes[j]['deviceID'][0:5] and classes[i]['deviceID'] != classes[j]['deviceID'] ):
                 if ( classes[i]['soundID'] == classes[j]['soundID'] ):
                     same_sound = True 
                 else : same_sound = False
-                deviceID =  classes[i]["deviceID"]
+                deviceID =  classes[i]["deviceID"][0:6]
                 date =  classes[i]["date"]
-                UTC = classes[i]["UTC"]
+                UTC = classes[i]["UTC"] + " " + classes[j]["UTC"]
                 soundID = classes[i]["soundID"]  + " " + classes[j]["soundID"]
                 Item = {
-                    "deviceID": deviceID,
+                    "roomID": deviceID,
                     "date" : date,
                     "UTC": UTC,
                     "soundID" : soundID,
@@ -64,3 +65,7 @@ def lambda_handler(event, context):
        
     return {"code":200,"message":"Sound added successfully"
     }
+    
+    
+    
+    
