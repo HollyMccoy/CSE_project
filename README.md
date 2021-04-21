@@ -1,4 +1,4 @@
-# Nielsen Sound Classifier for Correlation of Ambient Room Noise and Media Content
+# Nielsen Ambient Noise Sound Classifier for Attentiveness
 CSE senior capstone project with Nielsen
 
 List of sound categories:
