@@ -1,7 +1,7 @@
 # for testing accuracy of model and prints out % of all predicted sounds
 # default number of tests = 30
 # custom number of tests:
-# ex: python live_classify_accuracy.py 50 <-- for 50 tests
+# ex: python live_classify_accuracy.py --test_length=50 <-- for 50 tests
 
 from record import record
 import time, os, shutil, argparse, sys, logging
@@ -14,7 +14,7 @@ import numpy as np
 from glob import glob
 import pandas as pd
 from tqdm import tqdm
-
+import datetime
 
 # prevents retracing errors from printing
 logging.getLogger('tensorflow').disabled = True
@@ -57,7 +57,7 @@ def make_classification(args, src_dir, timestamp):
     time_stamp = timestamp#
     
     if test_num > 0:
-        print('Timestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))#
+        print(f'-Predicted class: {classes[y_pred]}')#
         predicts.append(classes[y_pred])
 
     # make post request
@@ -101,15 +101,18 @@ if __name__ == '__main__':
                         help='sample rate of clean audio')
     parser.add_argument('--threshold', type=str, default=20,
                         help='threshold magnitude for np.int16 dtype')
+    parser.add_argument('--test_length', type=int, default=31,
+                        help='total number of tests per run')
     args, _ = parser.parse_known_args()
     
-    num = 31 # 30 tests by default, extra 1 for ignoring first prediction during initial load
-    if len(sys.argv) > 1:
-        num = int(sys.argv[1]) + 1
+    # test_length = 31 by default to test 30 times, first one is ignored for loading tensorflow
+    num = args.test_length 
+
     sound_classes = sorted(os.listdir(args.src_dir))
     predicts = []
     test_num = 0
-    
+    classify_times = []
+
     while(test_num < num):
         # 1. record 5 secs and store in a folder
 
@@ -120,13 +123,21 @@ if __name__ == '__main__':
             os.makedirs(timestamp)  # make a directory
         output = dir + "/out.wav"
         if test_num > 0:
-            print(f"\nTest #{test_num}\nRecording starting ({output})")
+            print(f"\nTest #{test_num}\nRecording starting {(output)}")
 
         record(seconds=5, out=output)
         print("Done.")
         # 2. call make_classification on this folder
-
+        
+        start_classify = datetime.datetime.now()
         make_classification(args, output, timestamp)
+        end_classify = datetime.datetime.now()
+        diff = end_classify - start_classify
+        time_classify = diff.total_seconds()
+
+        if test_num > 0:
+            print(f"-classification time: {round(time_classify,2)} seconds")
+            classify_times.append(time_classify)
 
         # 3. delete directory
 
@@ -136,7 +147,7 @@ if __name__ == '__main__':
 
 
     # accuracy info
-    print('\n', 50*'=')
+    print(50*'=')
     print("Prediction statistics: ")
     correct_stats = []
     for x in sound_classes:
@@ -149,3 +160,6 @@ if __name__ == '__main__':
         if stats > 0:
             print(f"{x}: {round(stats,2)}%")
         correct_stats.clear()
+    time_avg = sum(classify_times)/len(classify_times)
+    print(50*'=')
+    print(f"Classify time average: {round(time_avg,2)} seconds, min: {round(min(classify_times),2)}s, max: {round(max(classify_times),2)}s")
