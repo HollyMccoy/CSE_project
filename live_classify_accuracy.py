@@ -1,7 +1,9 @@
 # for testing accuracy of model and prints out % of all predicted sounds
 # default number of tests = 30
-# custom number of tests:
-# ex: python live_classify_accuracy.py --test_length=50 <-- for 50 tests
+# example for 50 tests:
+# python live_classify_accuracy.py --test_length=51 <-- extra 1 is for ignoring first recording due to tensorflow load
+# does not post classifications to database
+
 
 from record import record
 import time, os, shutil, argparse, sys, logging
@@ -16,7 +18,7 @@ import pandas as pd
 from tqdm import tqdm
 import datetime
 
-# prevents retracing errors from printing
+# prevents tensorflow retracing errors from displaying on console
 logging.getLogger('tensorflow').disabled = True
 
 def make_classification(args, src_dir, timestamp):
@@ -60,32 +62,6 @@ def make_classification(args, src_dir, timestamp):
         print(f'-Predicted class: {classes[y_pred]}')#
         predicts.append(classes[y_pred])
 
-    # make post request
-    # for z, wav_fn in tqdm(enumerate(wav_paths), total=len(wav_paths)):
-    #     rate, wav = downsample_mono(wav_fn, args.sr)
-    #     mask, env = envelope(wav, rate, threshold=args.threshold)
-    #     clean_wav = wav[mask]
-    #     step = int(args.sr*args.dt)
-    #     batch = []
-
-    #     for i in range(0, clean_wav.shape[0], step):
-    #         sample = clean_wav[i:i+step]
-    #         sample = sample.reshape(-1, 1)
-    #         if sample.shape[0] < step:
-    #             tmp = np.zeros(shape=(step, 1), dtype=np.float32)
-    #             tmp[:sample.shape[0],:] = sample.flatten().reshape(-1, 1)
-    #             sample = tmp
-    #         batch.append(sample)
-    #     print(batch)
-    #     X_batch = np.array(batch, dtype=np.float32)
-    #     y_pred = model.predict(X_batch)
-    #     y_mean = np.mean(y_pred, axis=0)
-    #     y_pred = np.argmax(y_mean)
-    #     time_stamp = timestamp
-    #     print('\nTimestamp: {}, Predicted class: {}'.format(time_stamp, classes[y_pred]))
-    #     # make post request
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Audio Classification Training')
@@ -114,8 +90,8 @@ if __name__ == '__main__':
     classify_times = []
 
     while(test_num < num):
+        
         # 1. record 5 secs and store in a folder
-
         t = time.localtime()
         timestamp = time.strftime("%H%M%S", t)
         dir = timestamp
