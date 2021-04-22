@@ -82,11 +82,10 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
 
     while (True):
-        date = str(datetime.date.today().strftime("%m/%d/%y"))
-        timestamp = str(datetime.datetime.now().strftime("%H:%M:%S"))
-
+        
         # 1. record 5 secs and store in a folder
-
+        
+        timestamp = str(datetime.datetime.now().strftime("%H:%M:%S"))
         dir = timestamp
         
         if not os.path.exists(timestamp):
@@ -99,7 +98,7 @@ if __name__ == '__main__':
         # 2. call make_classification on this folder
         
         start_time = datetime.datetime.now()
-        make_classification(args, output, start_time, date)
+        make_classification(args, output, start_time)
 
         
         # 3. delete directory
