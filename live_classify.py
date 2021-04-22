@@ -17,7 +17,7 @@ import logging
 # prevents tensorflow retracing errors from displaying on console
 logging.getLogger('tensorflow').disabled = True
 
-def make_classification(args, src_dir, timestamp):
+def make_classification(args, src_dir, start_time, db_time):
 
     model = load_model(args.model_fn,
         custom_objects={'STFT':STFT,
@@ -52,16 +52,17 @@ def make_classification(args, src_dir, timestamp):
     y_mean = np.mean(y_pred, axis=0)#
     y_pred = np.argmax(y_mean)#
     time_stamp = timestamp#
-    print('-Predicted class: {}'.format(classes[y_pred]))#
+    #print('-Prediction: {}'.format(classes[y_pred]))#
     end_time = datetime.datetime.now()
-    diff = end_time - timestamp
+    diff = end_time - start_time
     total_time = diff.total_seconds()
-    print(f"-Classification time: {round(total_time,2)} seconds")
+    print(f"> Prediction: {classes[y_pred]}")
+    # print(f"> Prediction: {classes[y_pred]} ({round(total_time,2)} seconds)")
     
     # make post request
     start_post = str(datetime.datetime.now().strftime("%H:%M:%S"))
-    print(f"-Posting results to database. Start time: {start_post}")
-    post_db(classes[y_pred], "DEVICE ID", timestamp)   # replace "DEVICE ID" with desired name
+    #print(f"> Post start time: {start_post}")
+    post_db(classes[y_pred], "DEVICE ID", db_time)   # replace "DEVICE ID" with desired name
 
 
 if __name__ == '__main__':
@@ -93,12 +94,12 @@ if __name__ == '__main__':
         output = dir + "/out.wav"
         print(f"\nRecording starting ({output})")
         record(seconds=5, out=output)
-        print("Recording finished.")
+        print("Done.")
 
         # 2. call make_classification on this folder
-        
         start_time = datetime.datetime.now()
-        make_classification(args, output, start_time)
+        db_time = str(datetime.datetime.now().strftime("%H:%M:%S"))
+        make_classification(args, output, start_time, db_time)
 
         
         # 3. delete directory
