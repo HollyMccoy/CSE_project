@@ -9,7 +9,7 @@ def post_db(sound,device, t):
     #time passed into function
     time_now = t
 
-    URL = "https://wb44syzvc9.execute-api.us-east-2.amazonaws.com/beta/sound" # {insert API Gateway URL for triggering Lambda here}
+    URL = # insert API Gateway URL for triggering Lambda here
     headers = {"Content-Type":"aplication/json"}
     params = {"payload":"payload???"}
 
