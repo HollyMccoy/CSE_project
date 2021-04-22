@@ -36,6 +36,8 @@ python3 live_classify.py
 
 ![classes](https://user-images.githubusercontent.com/57106938/115637444-28730c80-a2de-11eb-8426-2e9809e959b0.png)
 
+NOTE: Everytime the terminal is restarted, the TLS block will need to be set. This command can be found in the commandline folder.
+
 The collect_quiet_room.py program is a script that will collect quiet audio of your specific environment so that the model classifies your room as quiet when no sounds are being made.
 
 
