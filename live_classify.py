@@ -14,9 +14,10 @@ from tqdm import tqdm
 from db_api import post_db
 import logging
 
+# prevents tensorflow retracing errors from displaying on console
 logging.getLogger('tensorflow').disabled = True
 
-def make_classification(args, src_dir, timestamp, date):
+def make_classification(args, src_dir, timestamp):
 
     model = load_model(args.model_fn,
         custom_objects={'STFT':STFT,
@@ -51,12 +52,13 @@ def make_classification(args, src_dir, timestamp, date):
     y_mean = np.mean(y_pred, axis=0)#
     y_pred = np.argmax(y_mean)#
     time_stamp = timestamp#
-    print('\nPredicted class: {}'.format(classes[y_pred]))#
+    print('-Predicted class: {}'.format(classes[y_pred]))#
+    
     # make post request
     start_post = str(datetime.datetime.now().strftime("%H:%M:%S"))
-    print(f"Start post: {start_post}")
-    post_db(classes[y_pred], "Marian Room", date, timestamp)
-    
+    print(f"Posting results to database. Start time: {start_post}")
+    post_db(classes[y_pred], "DEVICE ID", timestamp)   # replace "DEVICE ID" with desired name
+
 
 if __name__ == '__main__':
 
@@ -81,25 +83,24 @@ if __name__ == '__main__':
 
         # 1. record 5 secs and store in a folder
 
-        #t = time.localtime()
-        #timestamp = time.strftime("%H%M%S", t)
         dir = timestamp
-
+        
         if not os.path.exists(timestamp):
             os.makedirs(timestamp)      # make a directory
         output = dir + "/out.wav"
         print(f"\nRecording starting ({output})")
-
         record(seconds=5, out=output)
-        print("Done.")
+        print("Recording finished.")
 
         # 2. call make_classification on this folder
+        
         start_time = datetime.datetime.now()
         make_classification(args, output, start_time, date)
         end_time = datetime.datetime.now()
         diff = end_time - start_time
         total_time = diff.total_seconds()
-        print(f"Classification time: {round(total_time,2)} seconds")
+        print(f"-Classification time: {round(total_time,2)} seconds")
+        
         # 3. delete directory
         
         shutil.rmtree(dir)
