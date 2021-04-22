@@ -1,6 +1,10 @@
 # Nielsen Ambient Noise Sound Classifier for Attentiveness
 CSE senior capstone project with Nielsen
 
+
+To install all necessary requirements, refer to the commandline folder.
+
+
 List of sound categories:
 - Bird noises
 - Cat meowing
