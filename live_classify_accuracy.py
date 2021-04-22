@@ -50,10 +50,8 @@ def make_classification(args, src_dir, timestamp):
             sample = tmp#
         batch.append(sample)#
         
-#    print(batch)#
     X_batch = np.array(batch, dtype=np.float32)#
     y_pred = model.predict(X_batch)
-#    y_pred = predict(model, X_batch) # retracing warning fix attempt
     y_mean = np.mean(y_pred, axis=0)#
     y_pred = np.argmax(y_mean)#
     time_stamp = timestamp#
