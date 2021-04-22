@@ -39,9 +39,11 @@ live_classify.py
 The collect_quiet_room.py program is a script that will collect quiet audio of your specific environment so that the model classifies your room as quiet when no sounds are being made.
 
 
-Current sound accuracy of 2D convolutional model:
+Current accuracy by class of 2D convolutional model:
 
 ![Screen Shot 2021-04-21 at 5 31 05 PM](https://user-images.githubusercontent.com/57106938/115623596-64e73e00-a2c7-11eb-860c-f99ac6913e6c.png)
+
+Overall accuracy: 86%
 
 
 The lambda code to set up both databases (classification and correlation) can be found in the awsLambda folder.
