@@ -32,7 +32,7 @@ python3 train.py
 
 After the model is trained, live audio can be captured by live_classify.py and classify sounds in real time. live_classify_accuracy.py has the same functionality but provides additional metrics (average time to make classification and accuracy of each class) for data purposes and only runs through 30 tests before terminating. record.py provides the functionality for the capturing of live audio and is included in the live classify programs. db_api.py is also included in live_classify.py and sends the sound classifications to the DynamoDB database.
 
-live_classify.py
+python3 live_classify.py
 
 ![classes](https://user-images.githubusercontent.com/57106938/115637444-28730c80-a2de-11eb-8426-2e9809e959b0.png)
 
