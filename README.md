@@ -40,6 +40,7 @@ NOTE: Everytime the terminal is restarted, the TLS block will need to be set. Th
 
 The collect_quiet_room.py program is a script that will collect quiet audio of your specific environment so that the model classifies your room as quiet when no sounds are being made.
 
+If more datasets are needed, the augment_data.py script can be used to modify existing wav files to increase the noise levels, shift time, increase or decrease the pitch, and/or speed up or slow down the audio.
 
 Current accuracy by class of 2D convolutional model:
 
