@@ -1,0 +1,3 @@
+Librosa install link:
+https://learninone209186366.wordpress.com/2019/07/24/how-to-install-the-librosa-library-in-jetson-nano-or-aarch64-module/
+  -replace llvm-7 with llvm-10
